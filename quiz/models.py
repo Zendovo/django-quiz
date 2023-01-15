@@ -63,12 +63,12 @@ class Attempt(models.Model):
 class Answer(models.Model):
     attempt = models.ForeignKey(Attempt, related_name="answers", on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name="attempted_answers", on_delete=models.CASCADE)
-    selected = models.ForeignKey(Option, related_name="answer_selections", on_delete=models.CASCADE)
+    selected = models.ForeignKey(Option, null=True, related_name="answer_selections", on_delete=models.CASCADE)
 
     class Meta:
         verbose_name = 'Answer'
         verbose_name_plural = 'Answers'
 
     def __str__(self):
-        return f"{self.attempt.quiz.title} {self.question.title} {self.question.selected.text}"
+        return f"{self.attempt.quiz.title} {self.question.title} {self.selected.text}"
     
