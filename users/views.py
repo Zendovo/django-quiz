@@ -4,6 +4,8 @@ from django.views import View
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User, Group
 from django.http import HttpResponseNotFound
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required
 
 from .forms import RegisterForm
 from quiz.models import *
@@ -27,15 +29,16 @@ class RegisterView(View):
         return render(request, self.template_name, {'form': form})
 
 
+@method_decorator(login_required, name='dispatch')
 class PrevAttemptsView(View):
-    
+
     def get(self, request):
         attempts = Attempt.objects.filter(attempter=request.user)
         return render(request, 'users/prev_attempts.html', {'attempts': attempts})
 
 
 class PrevAttemptDetailView(View):
-    
+
     def get(self, request, *args, **kwargs):
         attempt_id = kwargs['id']
         attempt = Attempt.objects.filter(id=attempt_id, attempter=request.user)
