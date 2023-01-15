@@ -1,0 +1,1 @@
+The QuizMaster is assigned as a staff user and given permissions to modify the Quizzes and Questions associated with it.
