@@ -1,5 +1,5 @@
 from django.http import HttpResponseRedirect
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.models import User, Group
@@ -27,6 +27,16 @@ class RegisterView(View):
     def get(self, request):
         form = RegisterForm()
         return render(request, self.template_name, {'form': form})
+
+
+@method_decorator(login_required, name='dispatch')
+class LoginRedirectView(View):
+    
+    def get(self, request):
+        if request.user.is_staff and request.user.groups.filter(name="Quiz Master").exists():
+            return redirect('admin:index')
+        
+        return redirect('quiz-list-view')
 
 
 @method_decorator(login_required, name='dispatch')
