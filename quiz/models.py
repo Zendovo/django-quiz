@@ -35,8 +35,8 @@ class Question(models.Model):
 
 
 class Option(models.Model):
-    quiz = models.ForeignKey(
-        "Quiz", related_name='options', on_delete=models.CASCADE)
+    question = models.ForeignKey(
+        Question, related_name='options', on_delete=models.CASCADE)
     text = models.CharField("Text", max_length=500, null=False)
     answer = models.BooleanField("Is Answer?", default=False)
 

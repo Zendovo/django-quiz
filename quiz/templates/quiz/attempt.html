@@ -1,0 +1,23 @@
+{% extends "quiz/base.html" %}
+{% block title %}{{ quiz.title }}{% endblock %}
+
+{% block content %}
+    <h2>{{ quiz.title }}</h2>
+    <form method="post">
+        <ul>
+            {% for question in questions %}
+            <div class="mb-3">
+                <li>
+                    {{ question.title }}
+                    <br>
+                    {% for option in question.options.all %}
+                    <input type="radio" class="form-check-input" id="{{question.id}}-{{option.id}}" name="{{question.id}}" value="{{option.id}}}">
+                    <label for="{{question.id}}-{{option.id}}">{{option.text}}</label><br>
+                    {% endfor %}
+                </li>
+            </div>
+            {% endfor %}
+        </ul>
+        <input class="btn btn-primary" type="submit">
+    </form>
+{% endblock %}
