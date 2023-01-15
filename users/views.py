@@ -37,6 +37,7 @@ class PrevAttemptsView(View):
         return render(request, 'users/prev_attempts.html', {'attempts': attempts})
 
 
+@method_decorator(login_required, name='dispatch')
 class PrevAttemptDetailView(View):
 
     def get(self, request, *args, **kwargs):
