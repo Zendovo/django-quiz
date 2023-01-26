@@ -18,6 +18,11 @@ class Quiz(models.Model):
 class Question(models.Model):
     title = models.CharField('Question Title', max_length=500, null=False)
     quiz = models.ForeignKey("Quiz", related_name='questions', on_delete=models.CASCADE)
+    question_type = models.CharField('Question Type', max_length=50, choices=(('Single Correct Question', 'SCQ'), ('Multiple Correct Question', 'MCQ'), ('Numerical Question', 'NUM'), ('True or False Question', 'BOOL')), default='SCQ')
+    bool_answer = models.BooleanField('Answer if True/False Question', null=True, default=None)
+    num_answer = models.IntegerField('Answer if Numerical Question', null=True, default=None)
+    positive_marking = models.IntegerField('Positive Marking', default=4)
+    negative_marking = models.IntegerField('Negative Marking', default=1)
 
     class Meta:
         verbose_name = 'Question'
@@ -63,7 +68,9 @@ class Attempt(models.Model):
 class Answer(models.Model):
     attempt = models.ForeignKey(Attempt, related_name="answers", on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name="attempted_answers", on_delete=models.CASCADE)
-    selected = models.ForeignKey(Option, null=True, related_name="answer_selections", on_delete=models.CASCADE)
+    selected = models.ForeignKey(Option, null=True, related_name="answer_selections", on_delete=models.SET_NULL)
+    bool_answer = models.BooleanField('Answer if True/False Question', null=True, default=None)
+    num_answer = models.IntegerField('Answer if Numerical Question', null=True, default=None)
 
     class Meta:
         verbose_name = 'Answer'
