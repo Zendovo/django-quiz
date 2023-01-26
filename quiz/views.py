@@ -1,9 +1,11 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.views import View
 from django.views.generic import ListView, CreateView
 from django.http import HttpResponseNotFound, HttpResponseBadRequest
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.hashers import make_password, check_password
+import urllib
 
 from .models import *
 
@@ -14,8 +16,7 @@ class QuizListView(ListView):
 
 
 @method_decorator(login_required, name='dispatch')
-class QuizAttemptView(View):
-    model = Quiz
+class QuizPasswordView(View):
 
     def get(self, request, *args, **kwargs):
         quiz_id = kwargs['id']
@@ -24,6 +25,46 @@ class QuizAttemptView(View):
         if not quiz.exists():
             return HttpResponseNotFound('Quiz not found')
         quiz = quiz[0]
+
+        if quiz.password is None:
+            return redirect('quiz-attempt-view', id=quiz_id)
+
+        return render(request, 'quiz/password.html', {})
+
+    def post(self, request, *args, **kwargs):
+        quiz_id = kwargs['id']
+        quiz = Quiz.objects.filter(pk=quiz_id)
+
+        if not quiz.exists():
+            return HttpResponseNotFound('Quiz not found')
+        quiz = quiz[0]
+
+        data = request.POST
+
+        password = data.get('password', None)
+        if password is None:
+            return HttpResponseBadRequest('No Password')
+        
+        if check_password(password, quiz.password):
+            return redirect(f"/quiz/{quiz_id}/?{urllib.parse.urlencode({'ph': make_password(password, salt='test')})}")
+
+        return HttpResponseBadRequest('No Password')
+
+
+@method_decorator(login_required, name='dispatch')
+class QuizAttemptView(View):
+
+    def get(self, request, *args, **kwargs):
+        quiz_id = kwargs['id']
+        quiz = Quiz.objects.filter(pk=quiz_id)
+
+        if not quiz.exists():
+            return HttpResponseNotFound('Quiz not found')
+        quiz = quiz[0]
+
+        if not quiz.password is None:
+            if quiz.password != request.GET.get('ph', None):
+                return redirect('quiz-password-view', id=quiz_id)
 
         questions = Question.objects.filter(quiz=quiz)
 
@@ -44,6 +85,10 @@ class QuizAttemptView(View):
         if not quiz.exists():
             return HttpResponseNotFound('Quiz not found')
         quiz = quiz[0]
+
+        if not quiz.password is None:
+            if quiz.password != request.GET.get('ph', None):
+                redirect('quiz-password-view', id=quiz_id)
 
         attempt = Attempt.objects.create(quiz=quiz, attempter=request.user)
 

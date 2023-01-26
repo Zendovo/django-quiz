@@ -1,15 +1,21 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 
 # Create your models here.
 
 
 class Quiz(models.Model):
     title = models.CharField("Quiz Title", max_length=50)
+    password = models.CharField('Quiz Password', max_length=50, blank=True, null=True, default=None)
 
     class Meta:
         verbose_name = 'Quiz'
         verbose_name_plural = 'Quizzes'
+
+    def save(self, **kwargs):
+        self.password = make_password(self.password, salt='test')
+        super().save(**kwargs)
 
     def __str__(self):
         return self.title
