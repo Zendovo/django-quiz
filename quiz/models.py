@@ -82,3 +82,10 @@ class Answer(models.Model):
 class SelectedOptions(models.Model):
     answer = models.ForeignKey(Answer, related_name="selected_options", on_delete=models.CASCADE)
     option = models.ForeignKey(Option, related_name="answer_selections", on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Selected Option'
+        verbose_name_plural = 'Selected Options'
+
+    def __str__(self):
+        return f"{self.answer.id} {self.option.text}"

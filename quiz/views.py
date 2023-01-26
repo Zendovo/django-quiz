@@ -55,42 +55,46 @@ class QuizAttemptView(View):
         bool = questions.filter(question_type='BOOL')
 
         for question in scq:
-            selected_opt_id = data[f'{question.id}'][0]
+            answer = Answer.objects.create(attempt=attempt, question=question)
+
+            selected_opt_id = data.get(f'{question.id}'[0], None)
             selected = Option.objects.filter(
                 question=question, id=selected_opt_id)
             if not selected.exists():
                 return HttpResponseBadRequest('Bad Request')
             selected = selected[0]
 
-            answer = Answer.objects.create(attempt=attempt, question=question)
             if selected_opt_id is not None:
                 SelectedOptions.objects.create(answer=answer, option=selected)
 
         for question in mcq:
             options = Option.objects.filter(question=question)
             answer = Answer.objects.create(attempt=attempt, question=question)
-            for opt_id in data[f'{question.id}']:
-                option = options.filter(id=int(opt_id))
 
-                if option.exists():
-                    SelectedOptions.objects.create(answer=answer, option=option[0])
+            for option in options:
+                print(data.get(f'{question.id}-{option.id}', None))
+                tt = data.get(f'{question.id}-{option.id}', None)
+                if not tt is None:
+                    SelectedOptions.objects.create(
+                        answer=answer, option=option)
 
         for question in num:
             answer = Answer.objects.create(attempt=attempt, question=question)
-            try:
-                input = int(data[f'{question.id}'][0])
+            tt = data.get(f'{question.id}', None)
+            input = int(tt[0])
+
+            if not input is None:
                 answer.num_answer = input
                 answer.save()
-            except ValueError:
-                pass
 
         for question in bool:
             answer = Answer.objects.create(attempt=attempt, question=question)
-            input = data[f'{question.id}'][0]
+            input = data.get(f'{question.id}', ['None'])[0]
 
             if input == '1':
                 answer.bool_answer = True
             elif input == '0':
                 answer.bool_answer = False
+            answer.save()
 
         return redirect('quiz-list-view')
