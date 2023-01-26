@@ -3,22 +3,56 @@
 
 {% block content %}
     <h2>{{ quiz.title }}</h2>
+    Score {{ score }}
     <ul>
         {% for answer in attempt.answers.all %}
         <div class="mb-3">
             <li>
                 {{ answer.question.title }}
                 <br>
-                {% for option in answer.question.options.all %}
-                {% if option.answer %}
-                <input type="radio" class="form-check-input" id="{{question.id}}-{{option.id}}" name="{{question.id}}" value="{{option.id}}" checked disabled>
+                {% if answer.question.question_type == 'SCQ' %}
+                    {% for option in answer.question.options.all %}
+                    {% if option.answer %}
+                    <input type="radio" class="form-check-input" id="{{question.id}}-{{option.id}}" name="{{question.id}}" value="{{option.id}}" checked disabled>
+                    {% else %}
+                    <input type="radio" class="form-check-input" id="{{question.id}}-{{option.id}}" name="{{question.id}}" value="{{option.id}}" disabled>
+                    {% endif %}
+                    <label for="{{question.id}}-{{option.id}}">{{option.text}}</label><br>
+                    {% endfor %}
+                    <br><span>Selected Answer:</span><br>
+                    <span for="{{answer.question.id}}-{{answer.selected_options.first.option.id}}">{{answer.selected_options.first.option.text}}</span><br>
+                {% elif answer.question.question_type == 'MCQ' %}
+                    {% for option in answer.question.options.all %}
+                    {% if option.answer %}
+                    <input type="checkbox" class="form-check-input" id="{{question.id}}-{{option.id}}" name="{{question.id}}" value="{{option.id}}" checked disabled>
+                    {% else %}
+                    <input type="checkbox" class="form-check-input" id="{{question.id}}-{{option.id}}" name="{{question.id}}" value="{{option.id}}" disabled>
+                    {% endif %}
+                    <label for="{{question.id}}-{{option.id}}">{{option.text}}</label><br>
+                    {% endfor %}
+                    <br><span>Selected Answer:</span><br>
+                    {% for selected in answer.selected_options.all %}
+                        <span for="{{answer.question.id}}-{{selected.option.id}}">{{selected.option.text}}</span><br>
+                    {% endfor %}
+                {% elif answer.question.question_type == 'NUM' %}
+                    <input type="number" class="form-control" id="{{answer.question.id}}" name="{{answer.question.id}}" value="{{ answer.num_answer }}" disabled>
+                    <br><span>Attempted Answer:</span><br>
+                    <span for="{{answer.question.id}}">{{answer.num_answer}}</span><br>
                 {% else %}
-                <input type="radio" class="form-check-input" id="{{question.id}}-{{option.id}}" name="{{question.id}}" value="{{option.id}}" disabled>
+                    {% if answer.question.bool_answer == 1 %}
+                    <input type="radio" class="form-check-input" id="{{question.id}}-True" name="{{question.id}}" value="1" checked disabled>
+                    <label for="{{question.id}}-True">True</label><br>
+                    <input type="radio" class="form-check-input" id="{{question.id}}-False" name="{{question.id}}" value="0" disabled>
+                    <label for="{{question.id}}-False">False</label><br>
+                    {% else %}
+                    <input type="radio" class="form-check-input" id="{{question.id}}-True" name="{{question.id}}" value="1" disabled>
+                    <label for="{{question.id}}-True">True</label><br>
+                    <input type="radio" class="form-check-input" id="{{question.id}}-False" name="{{question.id}}" value="0" checked disabled>
+                    <label for="{{question.id}}-False">False</label><br>
+                    {% endif %}
+                    <br><span>Selected Answer:</span><br>
+                    <span for="{{answer.question.id}}">{{answer.bool_answer}}</span><br>
                 {% endif %}
-                <label for="{{question.id}}-{{option.id}}">{{option.text}}</label><br>
-                {% endfor %}
-                <br><span>Selected Answer:</span><br>
-                <span for="{{answer.question.id}}-{{answer.selected.id}}">{{answer.selected.text}}</span><br>
             </li>
         </div>
         {% endfor %}
