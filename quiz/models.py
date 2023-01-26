@@ -18,9 +18,9 @@ class Quiz(models.Model):
 class Question(models.Model):
     title = models.CharField('Question Title', max_length=500, null=False)
     quiz = models.ForeignKey("Quiz", related_name='questions', on_delete=models.CASCADE)
-    question_type = models.CharField('Question Type', max_length=50, choices=(('Single Correct Question', 'SCQ'), ('Multiple Correct Question', 'MCQ'), ('Numerical Question', 'NUM'), ('True or False Question', 'BOOL')), default='SCQ')
+    question_type = models.CharField('Question Type', max_length=50, choices=(('SCQ', 'Single Correct Question'), ('MCQ', 'Multiple Correct Question'), ('NUM', 'Numerical Question'), ('BOOL', 'True or False Question')), default='SCQ')
     bool_answer = models.BooleanField('Answer if True/False Question', null=True, default=None)
-    num_answer = models.IntegerField('Answer if Numerical Question', null=True, default=None)
+    num_answer = models.IntegerField('Answer if Numerical Question', blank=True, null=True, default=None)
     positive_marking = models.IntegerField('Positive Marking', default=4)
     negative_marking = models.IntegerField('Negative Marking', default=1)
 
@@ -68,7 +68,6 @@ class Attempt(models.Model):
 class Answer(models.Model):
     attempt = models.ForeignKey(Attempt, related_name="answers", on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name="attempted_answers", on_delete=models.CASCADE)
-    selected = models.ForeignKey(Option, null=True, related_name="answer_selections", on_delete=models.SET_NULL)
     bool_answer = models.BooleanField('Answer if True/False Question', null=True, default=None)
     num_answer = models.IntegerField('Answer if Numerical Question', null=True, default=None)
 
@@ -77,5 +76,9 @@ class Answer(models.Model):
         verbose_name_plural = 'Answers'
 
     def __str__(self):
-        return f"{self.attempt.quiz.title} {self.question.title} {self.selected.text}"
-    
+        return f"{self.attempt.quiz.title} {self.question.title}"
+
+
+class SelectedOptions(models.Model):
+    answer = models.ForeignKey(Answer, related_name="selected_options", on_delete=models.CASCADE)
+    option = models.ForeignKey(Option, related_name="answer_selections", on_delete=models.CASCADE)

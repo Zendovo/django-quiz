@@ -6,7 +6,7 @@
     <form method="post">
         {% csrf_token %}
         <ul>
-            {% for question in questions %}
+            {% for question in questions.scq %}
             <div class="mb-3">
                 <li>
                     {{ question.title }}
@@ -15,6 +15,40 @@
                     <input type="radio" class="form-check-input" id="{{question.id}}-{{option.id}}" name="{{question.id}}" value="{{option.id}}">
                     <label for="{{question.id}}-{{option.id}}">{{option.text}}</label><br>
                     {% endfor %}
+                </li>
+            </div>
+            {% endfor %}
+            {% for question in questions.mcq %}
+            <div class="mb-3">
+                <li>
+                    {{ question.title }}
+                    <br>
+                    {% for option in question.options.all %}
+                    <input type="checkbox" class="form-check-input" id="{{question.id}}-{{option.id}}" name="{{question.id}}-{{option.id}}">
+                    <label for="{{question.id}}-{{option.id}}">{{option.text}}</label><br>
+                    {% endfor %}
+                </li>
+            </div>
+            {% endfor %}
+            {% for question in questions.num %}
+            <div class="mb-3">
+                <li>
+                    {{ question.title }}
+                    <br>
+                    <label for="{{question.id}}">Answer:</label><br>
+                    <input type="number" class="form-control" id="{{question.id}}" name="{{question.id}}">
+                </li>
+            </div>
+            {% endfor %}
+            {% for question in questions.bool %}
+            <div class="mb-3">
+                <li>
+                    {{ question.title }}
+                    <br>
+                    <input type="radio" class="form-check-input" id="{{question.id}}-True" name="{{question.id}}" value="1">
+                    <label for="{{question.id}}-True">True</label><br>
+                    <input type="radio" class="form-check-input" id="{{question.id}}-False" name="{{question.id}}" value="0">
+                    <label for="{{question.id}}-False">False</label><br>
                 </li>
             </div>
             {% endfor %}

@@ -27,7 +27,12 @@ class QuizAttemptView(View):
 
         questions = Question.objects.filter(quiz=quiz)
 
-        return render(request, 'quiz/attempt.html', {'quiz': quiz, 'questions': questions, })
+        scq = questions.filter(question_type='SCQ')
+        mcq = questions.filter(question_type='MCQ')
+        num = questions.filter(question_type='NUM')
+        bool = questions.filter(question_type='BOOL')
+
+        return render(request, 'quiz/attempt.html', {'quiz': quiz, 'questions': {'scq': scq, 'mcq': mcq, 'num': num, 'bool': bool}, })
 
     def post(self, request, *args, **kwargs):
         print(request.POST)
@@ -43,7 +48,13 @@ class QuizAttemptView(View):
         attempt = Attempt.objects.create(quiz=quiz, attempter=request.user)
 
         questions = Question.objects.filter(quiz=quiz)
-        for question in questions:
+
+        scq = questions.filter(question_type='SCQ')
+        mcq = questions.filter(question_type='MCQ')
+        num = questions.filter(question_type='NUM')
+        bool = questions.filter(question_type='BOOL')
+
+        for question in scq:
             selected_opt_id = data[f'{question.id}'][0]
             selected = Option.objects.filter(
                 question=question, id=selected_opt_id)
@@ -51,10 +62,35 @@ class QuizAttemptView(View):
                 return HttpResponseBadRequest('Bad Request')
             selected = selected[0]
 
+            answer = Answer.objects.create(attempt=attempt, question=question)
             if selected_opt_id is not None:
-                Answer.objects.create(
-                    attempt=attempt, question=question, selected=selected)
-            else:
-                Answer.objects.create(attempt=attempt, question=question)
+                SelectedOptions.objects.create(answer=answer, option=selected)
+
+        for question in mcq:
+            options = Option.objects.filter(question=question)
+            answer = Answer.objects.create(attempt=attempt, question=question)
+            for opt_id in data[f'{question.id}']:
+                option = options.filter(id=int(opt_id))
+
+                if option.exists():
+                    SelectedOptions.objects.create(answer=answer, option=option[0])
+
+        for question in num:
+            answer = Answer.objects.create(attempt=attempt, question=question)
+            try:
+                input = int(data[f'{question.id}'][0])
+                answer.num_answer = input
+                answer.save()
+            except ValueError:
+                pass
+
+        for question in bool:
+            answer = Answer.objects.create(attempt=attempt, question=question)
+            input = data[f'{question.id}'][0]
+
+            if input == '1':
+                answer.bool_answer = True
+            elif input == '0':
+                answer.bool_answer = False
 
         return redirect('quiz-list-view')
