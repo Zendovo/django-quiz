@@ -7,7 +7,7 @@ from django.contrib.auth.hashers import make_password
 
 class Quiz(models.Model):
     title = models.CharField("Quiz Title", max_length=50)
-    password = models.CharField('Quiz Password', max_length=50, blank=True, null=True, default=None)
+    password = models.CharField('Quiz Password', max_length=255, blank=True, null=True, default=None)
 
     class Meta:
         verbose_name = 'Quiz'
