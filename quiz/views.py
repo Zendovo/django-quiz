@@ -76,7 +76,6 @@ class QuizAttemptView(View):
         return render(request, 'quiz/attempt.html', {'quiz': quiz, 'questions': {'scq': scq, 'mcq': mcq, 'num': num, 'bool': bool}, })
 
     def post(self, request, *args, **kwargs):
-        print(request.POST)
         data = request.POST
 
         quiz_id = kwargs['id']
@@ -117,7 +116,6 @@ class QuizAttemptView(View):
             answer = Answer.objects.create(attempt=attempt, question=question)
 
             for option in options:
-                print(data.get(f'{question.id}-{option.id}', None))
                 tt = data.get(f'{question.id}-{option.id}', None)
                 if not tt is None:
                     SelectedOptions.objects.create(
